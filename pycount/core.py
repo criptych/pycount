@@ -294,3 +294,114 @@ class TextReport(Report):
             print(self.SEPARATOR, file=file)
         else:
             print("No results.", file=file)
+
+
+from reportlab.lib import colors, units, styles, pagesizes
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.charts.piecharts import Pie
+
+class ChartReport(Report):
+    def generate(self, COUNTER, TIMED, file=None):
+        """Generates and saves a graphical breakdown report (with pie chart!)
+        """
+
+        HALF_INCH = 0.5 * units.inch
+
+        doc = SimpleDocTemplate(
+            file,
+            topMargin=HALF_INCH,
+            bottomMargin=HALF_INCH,
+            leftMargin=HALF_INCH,
+            rightMargin=HALF_INCH,
+            pagesize=pagesizes.LETTER
+            )
+
+        headerStyle = styles.ParagraphStyle('Header')
+        headerStyle.alignment = 1
+        headerStyle.fontName = 'Helvetica-Bold'
+        headerStyle.fontSize = 12
+        headerStyle.spaceAfter = 0.2 * units.inch
+        header = Paragraph("Pycount Report", headerStyle)
+
+        H, S, L = 2.0/6.0, 0.5, 0.5
+
+        row_backcolors = [
+            colors.Color(1.0, 1.0, 1.0),
+            colors.Color(*colors.hsl2rgb(H, S, 0.9)),
+        ]
+
+        header_backcolor = colors.Color(*colors.hsl2rgb(H, S, L))
+        text_color = colors.HexColor('#000')
+        header_forecolor = colors.HexColor('#000')
+        default_font = 'Helvetica'
+        header_font = 'Helvetica-Bold'
+        total_font = 'Helvetica-Bold'
+
+        tableStyle = TableStyle([
+
+            ################################################################
+            ## Default cell formatting
+
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
+            ('FONTNAME', (0, 0), (-1, -1), default_font),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+
+            ################################################################
+            ## Colors
+
+            ## Special background for headers; alternating background for data
+            ('ROWBACKGROUNDS', ( 0,  1), (-1, -3), row_backcolors),
+            ('BACKGROUND',     ( 0,  0), (-1,  0), header_backcolor),
+            ('BACKGROUND',     ( 0, -1), (-1, -1), header_backcolor),
+
+            ## Header and data text colors
+            ('TEXTCOLOR',      ( 0,  1), (-1, -2), text_color),
+            ('TEXTCOLOR',      ( 0,  0), (-1,  0), header_forecolor),
+            ('TEXTCOLOR',      ( 0, -1), (-1, -1), header_forecolor),
+
+            ################################################################
+            ## Lines
+
+            ################################################################
+            ## Text alignment and styling
+
+            ('ALIGN',          ( 0,  0), ( 0, -1), 'LEFT'),
+            ('ALIGN',          ( 1,  0), (-1, -1), 'RIGHT'),
+            ('FONTNAME',       ( 0,  0), (-1,  0), header_font),
+            ('FONTNAME',       ( 0, -2), (-1, -2), total_font),
+            ('FONTNAME',       ( 0, -1), (-1, -1), header_font),
+
+            ################################################################
+        ])
+
+        results = [
+            [key, COUNTER.file_types[key], value]
+            for key, value in sorted(
+                COUNTER.results.items(), key=lambda x: x[1], reverse=True
+            )
+            if value is not 0
+        ]
+
+        rows = results[:]
+        rows.insert(0, ["Language", "Files", "LOC"])
+        rows.append(["TOTAL", sum(COUNTER.file_types.values()), sum(COUNTER.results.values())])
+        rows.append(["RUNTIME (sec)", "", '{:.2f}'.format(TIMED)])
+
+        table = Table(rows, style=tableStyle, repeatRows=1,
+                      colWidths=[9 * HALF_INCH, 3 * HALF_INCH, 3 * HALF_INCH],
+                      rowHeights=[15 for row in rows])
+
+        drawing = Drawing(15 * HALF_INCH, 6 * HALF_INCH)
+        chart = Pie()
+        chart.width = 4 * HALF_INCH
+        chart.height = 4 * HALF_INCH
+        chart.x = (drawing.width - chart.width) / 2
+        chart.y = (drawing.height - chart.height) / 2
+        chart.data = [r[2] for r in results]
+        chart.labels = [r[0] for r in results]
+        chart.slices.fontName = 'Helvetica'
+
+        drawing.add(chart)
+
+        doc.build([header, drawing, table])

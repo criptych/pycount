@@ -54,5 +54,5 @@ setup(
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ),
-    install_requires='binaryornot',
+    install_requires=['binaryornot','reportlab'],
 )
