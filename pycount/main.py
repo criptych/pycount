@@ -20,30 +20,9 @@ import pkg_resources
 
 from .core import Counter
 from .core import Timer
+from .core import TextReport
 
 from .version import __version__ as VERSION
-
-
-def report(COUNTER, TIMED):
-    """Generates and prints a decent looking breakdown report for lines
-       of code for all existent languages under our path
-    """
-    if COUNTER.results:
-        counted = sum(COUNTER.file_types.values())
-        print("version " + VERSION)
-        print("\nLanguage                       Files         LOC")
-        print("-" * 48)
-        for key, value in sorted(COUNTER.results.items(), key=lambda x: x[1],
-                                 reverse=True):
-            if value is not 0:
-                print("{0:24}     {1:7d}   {2:9d}".format(key, COUNTER.file_types[key], value))
-        print("-" * 48)
-        print("{0:24}     {1:7d}   {2:9d}".format("SUM:", counted, sum(COUNTER.results.values())))
-        print("-" * 48)
-        print("{0:24} {1:23.2f}".format("RUNTIME (sec):", TIMED))
-        print("-" * 48)
-    else:
-        print("No results.")
 
 
 def main(args):
@@ -68,7 +47,8 @@ def main(args):
             COUNTER.count()
     finally:
         TIMED = timer.interval
-    report(COUNTER, TIMED)
+
+    TextReport().generate(COUNTER, TIMED)
 
 
 if __name__ == "__main__":

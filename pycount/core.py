@@ -253,3 +253,44 @@ class Counter(object):
                 except KeyError:
                     self.results[self.patterns[ext]] = 0
                     self.results[self.patterns[ext]] += count
+
+
+class Report(object):
+    def generate(self, COUNTER, TIMED, file=None):
+        pass
+
+
+class TextReport(Report):
+    FORMAT_COLS = "{0:<24}     {1:>7}   {2:>9}"
+    FORMAT_TIME = "{0:<24} {1:>23.2f}"
+    SEPARATOR = "-" * 48
+
+    def generate(self, COUNTER, TIMED, file=None):
+        """Generates and prints a decent looking breakdown report for lines
+           of code for all existent languages under our path
+        """
+
+        from .version import __version__ as VERSION
+
+        if file is None:
+            file = sys.stdout
+        elif not hasattr(file, 'write'):
+            file = open(file, 'wt')
+
+        if COUNTER.results:
+            counted = sum(COUNTER.file_types.values())
+            print("version " + VERSION, file=file)
+            print(file=file)
+            print(self.FORMAT_COLS.format("Language", "Files", "LOC"), file=file)
+            print(self.SEPARATOR, file=file)
+            for key, value in sorted(COUNTER.results.items(), key=lambda x: x[1],
+                                     reverse=True):
+                if value is not 0:
+                    print(self.FORMAT_COLS.format(key, COUNTER.file_types[key], value), file=file)
+            print(self.SEPARATOR, file=file)
+            print(self.FORMAT_COLS.format("SUM:", counted, sum(COUNTER.results.values())), file=file)
+            print(self.SEPARATOR, file=file)
+            print(self.FORMAT_TIME.format("RUNTIME (sec):", TIMED), file=file)
+            print(self.SEPARATOR, file=file)
+        else:
+            print("No results.", file=file)
