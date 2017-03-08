@@ -21,8 +21,8 @@ import pkg_resources
 from pycount.core import Counter
 from pycount.core import Timer
 
+from pycount.version import __version__ as VERSION
 
-VERSION = pkg_resources.require('pycount')[0].version
 
 def report(COUNTER, TIMED):
     """Generates and prints a decent looking breakdown report for lines

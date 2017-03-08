@@ -12,3 +12,5 @@ def check_requirements():
         raise ImportError("pycount requires python 2.6 or later.")
 
 check_requirements()
+
+from .version import __version__
