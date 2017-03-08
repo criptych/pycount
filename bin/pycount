@@ -24,7 +24,7 @@ from pycount.core import Timer
 
 VERSION = pkg_resources.require('pycount')[0].version
 
-def report():
+def report(COUNTER, TIMED):
     """Generates and prints a decent looking breakdown report for lines
        of code for all existent languages under our path
     """
@@ -46,14 +46,14 @@ def report():
         print("No results.")
 
 
-if __name__ == "__main__":
+def main(args):
     PARSER = argparse.ArgumentParser(description='Perform LOC counting.')
     PARSER.add_argument('-v', '--version', action='version',
                         version=VERSION)
     PARSER.add_argument('-e', '--exclude', nargs=1, type=str,
                         help='directories/files to be excluded from counting')
     PARSER.add_argument('files', nargs='*')
-    ARGS = vars(PARSER.parse_args())
+    ARGS = vars(PARSER.parse_args(args))
     try:
         EXCLUDED = ARGS['exclude'][0].split(',')
     except (KeyError, TypeError):
@@ -68,4 +68,9 @@ if __name__ == "__main__":
             COUNTER.count()
     finally:
         TIMED = timer.interval
-    report()
+    report(COUNTER, TIMED)
+
+
+if __name__ == "__main__":
+    import sys
+    main(sys.argv[1:])
