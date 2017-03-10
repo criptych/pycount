@@ -324,7 +324,7 @@ class ChartReport(Report):
         headerStyle.spaceAfter = 0.2 * units.inch
         header = Paragraph("Pycount Report", headerStyle)
 
-        H, S, L = 2.0/6.0, 0.5, 0.5
+        H, S, L = 0.0, 0.0, 0.8
 
         row_backcolors = [
             colors.Color(1.0, 1.0, 1.0),
