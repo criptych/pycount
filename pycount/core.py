@@ -401,6 +401,18 @@ class ChartReport(Report):
         chart.data = [r[2] for r in results]
         chart.labels = [r[0] for r in results]
         chart.slices.fontName = 'Helvetica'
+        chart.slices.fontSize = 8
+
+        pieColors = [
+            colors.yellowgreen,
+            colors.gold,
+            colors.lightskyblue,
+            colors.lightcoral,
+            colors.red
+        ]
+
+        for i, d in enumerate(chart.data):
+            chart.slices[i].fillColor = pieColors[i % len(pieColors)]
 
         drawing.add(chart)
 
